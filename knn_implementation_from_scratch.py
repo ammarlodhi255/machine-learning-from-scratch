@@ -10,6 +10,8 @@
     In case of classification: Take the majority vote and assign that class to the data point.
 '''
 
+from sklearn.model_selection import train_test_split
+from sklearn import datasets
 import numpy as np
 
 
@@ -26,7 +28,7 @@ class KNN:
         self.y_train = y
 
     def predict(self, X):
-        predictions = [get_class(x) for x in X]
+        predictions = [self.get_class(x) for x in X]
         return predictions
 
     def get_class(self, x):
@@ -38,8 +40,9 @@ class KNN:
         k_labels = [y_train[i] for i in k_indices]
 
         # Get the majority vote
+        return self.get_majority_vote(k_labels)
 
-    def get_majority_vote(k_labels):
+    def get_majority_vote(self, k_labels):
         label_counts = {}
 
         for label in k_labels:
@@ -51,9 +54,24 @@ class KNN:
         max_label = 0
         max_occurence = 0
 
-        for key, value in k_labels.items():
+        for key, value in label_counts.items():
             if max_occurence < label_counts[key]:
                 max_label = key
                 max_occurence = label_counts[key]
 
         return max_label
+
+
+# Testing on IRIS Dataset
+iris_ds = datasets.load_iris()
+X, y = iris_ds.data, iris_ds.target
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42)
+
+knn = KNN(k=5)
+
+knn.fit(X_train, y_train)
+print(knn.predict(X_test[:10]))
+print(y_test[:10])
+print('Accuracy: ' + str(np.sum(knn.predict(X_test) == y_test) / len(y_test)))
